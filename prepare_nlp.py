@@ -117,31 +117,31 @@ def parse_and_count_entities(data_row: dict):
     data_row['embedding'] = doc.vector
 
     return data_row
-
-df = pd.read_csv(
-    "daiktai_cleaned.csv",
-    sep="ʃ",
-    engine="python",
-    on_bad_lines='skip'
-)
-df_records = df.to_dict('records')
-
-with Parallel(
-    n_jobs=os.cpu_count() - 2,
-    mmap_mode=None,
-    backend="multiprocessing"
-) as parallel:
-
-    results = parallel(
-        delayed(parse_and_count_entities)( data_row )
-        for data_row in df_records
+if __name__ == "__main__":
+    df = pd.read_csv(
+        "daiktai_translated_small.csv",
+        sep="ʃ",
+        engine="python",
+        on_bad_lines='skip'
     )
-print('Done')
+    df_records = df.to_dict('records')
 
-res_df = pd.DataFrame(results)
+    with Parallel(
+        n_jobs=os.cpu_count() - 2,
+        mmap_mode=None,
+        backend="multiprocessing"
+    ) as parallel:
 
-res_df[['Sub_Category_1', 'Sub_Category_2', 'ner_dict', 'embedding']]\
-    .dropna()\
-    .to_csv('prep_data.csv')
+        results = parallel(
+            delayed(parse_and_count_entities)( data_row )
+            for data_row in df_records
+        )
+    print('Done')
 
-print(res_df.head())
+    res_df = pd.DataFrame(results)
+
+    res_df[['Sub_Category_1', 'Sub_Category_2', 'ner_dict', 'embedding']]\
+        .dropna()\
+        .to_csv('prep_data.csv')
+
+    print(res_df.head())
